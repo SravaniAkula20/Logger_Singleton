@@ -17,7 +17,7 @@ class LoggerImpl(Logger):
             with cls._instance_lock:
                 if cls._instance is None:
                     cls._instance= super().__new__(cls)
-                return cls._instance
+        return cls._instance
 
     def __init__(self):
         # TODO:
@@ -30,6 +30,7 @@ class LoggerImpl(Logger):
         if hasattr(self,"_initialized"):
             return
         self.file= None
+        self.file_path = None
         self._initialized = True
 
     @classmethod
@@ -45,12 +46,18 @@ class LoggerImpl(Logger):
         # TODO:
         # Reset the Singleton instance.
         # Think about what should happen if a file is still open.
+        if cls._instance is not None:
+            cls._instance.close()
         cls._instance = None
 
     def set_log_file(self, file_path):
         # TODO:
         # Open the log file and store the file path.
+        if self.file is not None:
+            self.file.close()
+
         self.file = open(file_path,"a")
+        self.file_path = file_path
 
     def log(self, level, message):
         # TODO:
@@ -60,13 +67,13 @@ class LoggerImpl(Logger):
         # 4. Write it to the file.
         # 5. Make the operation thread-safe.
         d = datetime.now()
-        entry = f"{d},[{level.info}],{message},\n"
-        self.file = write(entry)
+        entry = f"{d},[{level.value}],{message},\n"
+        self.file.write(entry)
 
     def get_log_file(self):
         # TODO:
         # Return the current log file path.
-        return self.file
+        return self.file_path
 
     def flush(self):
         # TODO:
